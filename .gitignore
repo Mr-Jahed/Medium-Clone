@@ -7,29 +7,63 @@ __pycache__/
 # Django
 *.log
 db.sqlite3
+db.sqlite3-journal
 
 # Environment variables
 .env
-.env.example
+.env.local
+.env.production
 venv/
-
-# Documentation to exclude
-API_TESTING_GUIDE.md
+env/
+ENV/
 
 # Media files
 media/
+staticfiles/
 
 # Node.js
 node_modules/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
 
 # React build
 /frontend/build
+/frontend/.env.local
+/frontend/.env.production
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Backup files
+*.sql
+*.bak
+*.backup
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage
+coverage/
+.coverage
+htmlcov/
+
+# Pytest
+.pytest_cache/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Redis
+dump.rdb

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Comments from '../components/Comments';
+import ReadingProgress from '../components/ReadingProgress';
+import AudioPlayer from '../components/AudioPlayer';
 import api from '../services/api';
 
 const Article = () => {
@@ -131,7 +133,9 @@ const Article = () => {
   }
 
   return (
-    <div className="content-container">
+    <>
+      <ReadingProgress />
+      <div className="content-container">
       <Link to="/" className="back-button">
         ← Back to Home
       </Link>
@@ -181,6 +185,8 @@ const Article = () => {
           </div>
         </header>
         
+        <AudioPlayer title={article.title} content={article.content} />
+        
         {article.featured_image && (
           <img 
             src={getImageUrl(article.featured_image)} 
@@ -213,6 +219,7 @@ const Article = () => {
       
       <Comments articleSlug={slug} />
     </div>
+    </>
   );
 };
 

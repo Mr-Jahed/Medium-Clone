@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import RichTextEditor from '../components/RichTextEditor';
+import useAutoSave from '../hooks/useAutoSave';
 
 const Write = () => {
   const [formData, setFormData] = useState({
@@ -14,9 +16,41 @@ const Write = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [draftId, setDraftId] = useState(null);
   
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const autoSaveDraft = useCallback(async (data) => {
+    if (!data.title || !data.content) return;
+    
+    try {
+      const submitData = new FormData();
+      submitData.append('title', data.title);
+      submitData.append('content', data.content);
+      submitData.append('excerpt', data.excerpt);
+      submitData.append('status', 'draft');
+      
+      if (data.featured_image) {
+        submitData.append('featured_image', data.featured_image);
+      }
+
+      if (draftId) {
+        await api.patch(`/articles/${draftId}/`, submitData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        const response = await api.post('/articles/', submitData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        setDraftId(response.data.id);
+      }
+    } catch (err) {
+      console.error('Auto-save failed:', err);
+    }
+  }, [draftId]);
+
+  const autoSaveStatus = useAutoSave(formData, autoSaveDraft, 3000);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -141,14 +175,19 @@ const Write = () => {
           style={{minHeight: '80px'}}
         />
         
-        <textarea
-          name="content"
+        <RichTextEditor
           value={formData.content}
-          onChange={handleChange}
+          onChange={(content) => setFormData(prev => ({ ...prev, content }))}
           placeholder="Tell your story..."
-          className="content-textarea"
-          required
         />
+        
+        {autoSaveStatus !== 'idle' && (
+          <div className={`auto-save-indicator ${autoSaveStatus}`}>
+            {autoSaveStatus === 'saving' && '💾 Saving draft...'}
+            {autoSaveStatus === 'saved' && '✓ Draft saved'}
+            {autoSaveStatus === 'error' && '⚠ Save failed'}
+          </div>
+        )}
         
         <div className="form-actions">
           <button

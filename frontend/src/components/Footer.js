@@ -1,11 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [sidebarHidden, setSidebarHidden] = useState(false);
+
+  useEffect(() => {
+    const checkSidebar = () => {
+      const mainContent = document.querySelector('.main-content');
+      if (mainContent) {
+        setSidebarHidden(mainContent.classList.contains('sidebar-hidden'));
+      }
+    };
+
+    checkSidebar();
+    const observer = new MutationObserver(checkSidebar);
+    const mainContent = document.querySelector('.main-content');
+    
+    if (mainContent) {
+      observer.observe(mainContent, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <footer className="footer">
+    <footer className={`footer ${sidebarHidden ? 'sidebar-hidden' : ''}`}>
       <div className="footer-container">
         <div className="footer-content">
           <div className="footer-section">

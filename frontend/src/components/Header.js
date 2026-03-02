@@ -9,7 +9,6 @@ const Header = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [latestNotification, setLatestNotification] = useState(null);
@@ -57,15 +56,10 @@ const Header = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setAvatarMenuOpen(false);
-      setSidebarOpen(false);
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  const handleLogout = () => {
+    logout();
+    setSidebarOpen(false);
+    navigate('/login');
   };
 
   const handleSearch = (e) => {
@@ -81,22 +75,10 @@ const Header = () => {
     navigate('/notifications');
   };
 
-  const handleNavigation = (path) => {
-    setAvatarMenuOpen(false);
-    navigate(path);
-  };
-
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
     return `http://localhost:8000${imagePath}`;
-  };
-
-  const maskEmail = (email) => {
-    if (!email) return '';
-    const [username, domain] = email.split('@');
-    const maskedUsername = username.charAt(0) + '*'.repeat(username.length - 2) + username.charAt(username.length - 1);
-    return `${maskedUsername}@${domain}`;
   };
 
   return (
@@ -149,54 +131,6 @@ const Header = () => {
                     <span className="notification-badge">{unreadCount}</span>
                   )}
                 </button>
-                <div className="user-avatar-menu">
-                  {user.avatar ? (
-                    <img 
-                      src={getImageUrl(user.avatar)} 
-                      alt={user.username}
-                      className="header-avatar"
-                      onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
-                    />
-                  ) : (
-                    <div 
-                      className="header-avatar"
-                      onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
-                    >
-                      {user.first_name ? user.first_name[0].toUpperCase() : user.email[0].toUpperCase()}
-                    </div>
-                  )}
-                  
-                  {avatarMenuOpen && (
-                    <div className="avatar-dropdown">
-                      <div className="dropdown-header">
-                        <div className="dropdown-user-info">
-                          <div className="dropdown-name">
-                            {user.first_name && user.last_name
-                              ? `${user.first_name} ${user.last_name}`
-                              : user.username
-                            }
-                          </div>
-                          <div className="dropdown-email">{maskEmail(user.email)}</div>
-                        </div>
-                      </div>
-                      
-                      <div className="dropdown-divider"></div>
-                      
-                      <button 
-                        type="button"
-                        className="dropdown-item logout-item" 
-                        onClick={handleLogout}
-                      >
-                        <svg className="dropdown-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                          <polyline points="16 17 21 12 16 7"/>
-                          <line x1="21" y1="12" x2="9" y2="12"/>
-                        </svg>
-                        Sign out
-                      </button>
-                    </div>
-                  )}
-                </div>
               </div>
             ) : (
               <>
@@ -326,8 +260,6 @@ const Header = () => {
           </nav>
         </div>
       )}
-      
-      {avatarMenuOpen && <div className="dropdown-overlay" onClick={() => setAvatarMenuOpen(false)}></div>}
       
       {showNotificationPopup && latestNotification && (
         <div className="notification-popup">
